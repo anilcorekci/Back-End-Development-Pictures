@@ -35,7 +35,9 @@ def count():
 ######################################################################
 @app.route("/picture", methods=["GET"])
 def get_pictures():
-    pass
+    if data:
+        return jsonify(data), 200
+    return {"message": "Internal Server Error"}, 500
 
 ######################################################################
 # GET A PICTURE
@@ -44,15 +46,25 @@ def get_pictures():
 
 @app.route("/picture/<int:id>", methods=["GET"])
 def get_picture_by_id(id):
-    pass
-
+    if data:
+        for sub in data:
+            if sub['id'] == id:
+                return jsonify(sub), 200
+    
+    return {"message": "Resource not found"}, 404
 
 ######################################################################
 # CREATE A PICTURE
 ######################################################################
 @app.route("/picture", methods=["POST"])
 def create_picture():
-    pass
+    picture = request.get_json()
+    if picture in data:
+        return {"Message": f"picture with id {picture['id']}"
+        " already present"}, 302
+
+    data.append(picture)
+    return jsonify(id=picture["id"]), 201
 
 ######################################################################
 # UPDATE A PICTURE
@@ -61,11 +73,22 @@ def create_picture():
 
 @app.route("/picture/<int:id>", methods=["PUT"])
 def update_picture(id):
-    pass
+    picture = request.get_json()
+    for pic in data:
+        if pic['id'] == id:
+            data[data.index(pic)] = picture
+            return jsonify(pic), 200
+    
+    return {"message": "picture not found"}, 404
 
-######################################################################
 # DELETE A PICTURE
 ######################################################################
 @app.route("/picture/<int:id>", methods=["DELETE"])
 def delete_picture(id):
-    pass
+    id_dict = { each["id"]: each for each in data}
+    if id in id_dict:
+        picture = id_dict[id]
+        data.remove(picture)
+        return {}, 204
+
+    return {"message": "picture not found"}, 404
